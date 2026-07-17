@@ -1,43 +1,95 @@
-# CareerPilot AI
+# 🚀 Career Compass
 
-CareerPilot AI is an AI-powered career success platform that helps job seekers discover opportunities, analyze skill gaps, track applications, manage interviews, and improve employability through personalized recommendations.
+AI-Powered Career Success Platform
+
+---
+
+## 📖 About
+
+Career Compass is a full-stack AI-powered career platform that helps students and job seekers manage every stage of their career journey.
+
+It enables users to:
+
+- Search Jobs
+- Save Jobs
+- Apply for Jobs
+- Track Applications
+- Build Resume
+- Prepare for Interviews
+- View Career Insights
+- Manage Profile
+- Receive Notifications
+- Dark/Light Theme
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+- React
+- Vite
+- Tailwind CSS
+- Axios
+- React Router
+
+### Backend
+- Spring Boot
+- Spring Security
+- REST API
+- JWT Authentication
+
+### Database
+- MySQL
+
+---
 
 ## Features
 
-* User Authentication
-* Resume Upload & Analysis
-* Skill Gap Detection
-* AI Job Recommendations
-* Job Application Tracking
-* Interview Scheduling
-* Recruiter Dashboard
-* Notification System
-* Analytics Dashboard
+✅ User Authentication
 
-## Tech Stack
+✅ Resume Builder
 
-### Frontend
+✅ Job Search
 
-* React
-* Material UI
-* Axios
+✅ Save Jobs
 
-### Backend
+✅ Apply Jobs
 
-* Spring Boot
-* Spring Security
-* JWT Authentication
-* JPA/Hibernate
+✅ Track Applications
 
-### Database
+✅ Interview Preparation
 
-* MySQL
+✅ Career Insights
 
-### Deployment
+✅ Notifications
 
-* Vercel
-* Render
+✅ User Profile
 
-## Project Status
+✅ Settings
 
-Currently under development.
+✅ Dark / Light Theme
+
+---
+
+## Screenshots
+
+(Add your screenshots here)
+
+---
+
+## Future Enhancements
+
+- AI Resume Analysis
+- AI Interview Assistant
+- Skill Recommendation
+- Email Notifications
+- Recruiter Dashboard
+- Admin Dashboard
+
+---
+
+## Author
+
+**Niharika Reddy**
+
+MBA (Marketing & Business Analytics)
