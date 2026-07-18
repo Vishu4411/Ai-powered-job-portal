@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/auth";
+const API = "https://ai-powered-job-portal-production-573c.up.railway.app/auth";
 
 export const login = (user) => {
     return axios.post(`${API}/login`, user);
