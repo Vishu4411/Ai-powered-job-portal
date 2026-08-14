@@ -4,6 +4,11 @@ export const getCareerReadiness = () => {
   return API.get("/ai/career/readiness");
 };
 
+export const getCareerActionPlan = () => {
+  return API.get("/ai/career/action-plan");
+};
+
+
 export const startMockInterview = (jobId) => {
   return API.post("/ai/interview-simulator/start", jobId ? { jobId } : {});
 };

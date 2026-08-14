@@ -42,7 +42,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
                         .requestMatchers("/recruiter/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
                         .requestMatchers("/ai/recruiter/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
+                        .requestMatchers("/ai/career/**", "/ai/interview-simulator/**").hasAnyAuthority("ROLE_USER", "USER")
                         .requestMatchers("/companies/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
+
                         .requestMatchers(HttpMethod.POST, "/jobs/*/apply").authenticated()
                         .requestMatchers("/notifications/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/jobs/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")

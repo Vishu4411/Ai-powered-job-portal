@@ -2,6 +2,7 @@ import StatsCards from "../components/dashboard/StatsCards";
 import ApplicationChart from "../components/dashboard/ApplicationChart";
 import ProfileStrength from "../components/dashboard/ProfileStrength";
 import CareerReadiness from "../components/dashboard/CareerReadiness";
+import NextBestActionCard from "../components/dashboard/NextBestActionCard";
 import AIRecommendations from "../components/dashboard/AIRecommendations";
 import RecommendedJobs from "../components/dashboard/RecommendedJobs";
 import RecentActivity from "../components/dashboard/RecentActivity";
@@ -20,7 +21,10 @@ function Dashboard() {
 
       <StatsCards />
 
+      <NextBestActionCard />
+
       <CareerReadiness />
+
 
       <div className="grid lg:grid-cols-3 gap-6">
 

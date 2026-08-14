@@ -2,12 +2,14 @@ package com.vishnu.ai_job_portal_backend.services;
 
 import com.vishnu.ai_job_portal_backend.dto.ATSResumeAnalysisDTO;
 import com.vishnu.ai_job_portal_backend.dto.CandidateInsightsDTO;
+import com.vishnu.ai_job_portal_backend.dto.CareerActionPlanDTO;
 import com.vishnu.ai_job_portal_backend.dto.JobMatchResultDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewFeedbackDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewSubmissionDTO;
 import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
+
 
 
 
@@ -311,6 +313,42 @@ public class GeminiAIProvider implements AIProvider {
 
         return baseFeedback;
     }
+
+    @Override
+    public CareerActionPlanDTO generateCareerActionPlanCoaching(UserProfileDTO candidate, CareerActionPlanDTO basePlan) {
+        if (!isApiKeyConfigured() || basePlan == null) {
+            return basePlan;
+        }
+
+        try {
+            String prompt = String.format(
+                    "You are a Senior AI Career Coach evaluating a candidate profile for role readiness.\n" +
+                    "Candidate Headline: %s\n" +
+                    "Skills: %s\n" +
+                    "Overall Readiness Score: %d%%\n" +
+                    "Priority Focus: %s\n" +
+                    "Next Best Action: %s\n\n" +
+                    "Provide a 2-3 sentence inspiring executive summary coaching message that motivates the candidate and highlights why focusing on %s will maximize their job placement chances within %s.",
+                    candidate != null && candidate.getHeadline() != null ? candidate.getHeadline() : "Software Developer",
+                    candidate != null && candidate.getSkills() != null ? candidate.getSkills() : "Java, SQL",
+                    basePlan.getOverallReadinessScore(),
+                    basePlan.getTopPriorityFocus(),
+                    basePlan.getNextBestAction(),
+                    basePlan.getTopPriorityFocus(),
+                    basePlan.getEstimatedTimeline()
+            );
+
+            String coachingSummary = callGeminiApi(prompt);
+            if (coachingSummary != null && !coachingSummary.trim().isEmpty()) {
+                basePlan.setExecutiveSummary(coachingSummary.trim());
+            }
+        } catch (Exception e) {
+            log.warn("Gemini Career Action Plan Coaching failed: {}", e.getMessage());
+        }
+
+        return basePlan;
+    }
+
 
 
 

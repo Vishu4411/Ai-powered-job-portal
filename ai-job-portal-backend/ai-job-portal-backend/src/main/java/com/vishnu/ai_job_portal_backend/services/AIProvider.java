@@ -8,6 +8,7 @@ import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
 
+import com.vishnu.ai_job_portal_backend.dto.CareerActionPlanDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewFeedbackDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewSubmissionDTO;
 
@@ -32,7 +33,10 @@ public interface AIProvider {
     CandidateInsightsDTO generateCandidateInsights(UserProfileDTO candidate, Job job, JobMatchResultDTO matchResult, CandidateInsightsDTO baseInsights);
 
     MockInterviewFeedbackDTO evaluateMockInterviewAnswers(UserProfileDTO candidate, Job job, MockInterviewSubmissionDTO submission, MockInterviewFeedbackDTO baseFeedback);
+
+    CareerActionPlanDTO generateCareerActionPlanCoaching(UserProfileDTO candidate, CareerActionPlanDTO basePlan);
 }
+
 
 
 

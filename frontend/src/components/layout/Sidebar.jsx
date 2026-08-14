@@ -21,6 +21,7 @@ import {
 
 const candidateNavItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/career-plan", label: "Career Action Plan", icon: Target },
   { to: "/resume", label: "Resume Builder", icon: FileText },
   { to: "/jobs", label: "Job Search", icon: Briefcase },
   { to: "/saved-jobs", label: "Saved Jobs", icon: Heart },
@@ -31,6 +32,7 @@ const candidateNavItems = [
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
+
 
 
 const recruiterNavItems = [
