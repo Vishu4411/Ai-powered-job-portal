@@ -1,11 +1,13 @@
-import axios from "axios";
-
-const API = "http://localhost:8080/applications";
+import API from "./api";
 
 export const getApplications = (email) => {
-    return axios.get(`${API}/${email}`);
+    return API.get(`/applications/${email}`);
 };
 
 export const applyJob = (application) => {
-    return axios.post(API, application);
+    return API.post("/applications", application);
+};
+
+export const getInterviews = () => {
+    return API.get("/applications/interviews");
 };

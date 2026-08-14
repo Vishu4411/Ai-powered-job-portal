@@ -13,9 +13,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  Building,
+  PlusCircle,
+  FolderKanban,
 } from "lucide-react";
 
-const navItems = [
+const candidateNavItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/resume", label: "Resume Builder", icon: FileText },
   { to: "/jobs", label: "Job Search", icon: Briefcase },
@@ -27,11 +30,24 @@ const navItems = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
+const recruiterNavItems = [
+  { to: "/recruiter/dashboard", label: "Recruiter Dashboard", icon: LayoutDashboard },
+  { to: "/recruiter/company", label: "Company Profile", icon: Building },
+  { to: "/recruiter/post-job", label: "Post New Job", icon: PlusCircle },
+  { to: "/recruiter/jobs", label: "My Jobs & Applicants", icon: FolderKanban },
+  { to: "/jobs", label: "Browse Job Portal", icon: Briefcase },
+  { to: "/settings", label: "Settings", icon: Settings },
+];
+
 function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const fullName = localStorage.getItem("fullName") || "Guest";
-  const role = localStorage.getItem("role") || "USER";
+  const role = localStorage.getItem("role") || "ROLE_USER";
+
+  const isRecruiter = role === "ROLE_RECRUITER" || role === "RECRUITER";
+  const navItems = isRecruiter ? recruiterNavItems : candidateNavItems;
+
 
   const initials = fullName
     .split(" ")

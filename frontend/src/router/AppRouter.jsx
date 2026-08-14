@@ -18,6 +18,11 @@ import Settings from "../pages/Settings";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import SavedJobs from "../pages/SavedJobs";
+import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
+import CompanyProfile from "../pages/recruiter/CompanyProfile";
+import PostJob from "../pages/recruiter/PostJob";
+import RecruiterJobs from "../pages/recruiter/RecruiterJobs";
+import JobApplicants from "../pages/recruiter/JobApplicants";
 
 function AppRouter() {
   return (
@@ -45,10 +50,18 @@ function AppRouter() {
           <Route path="/insights" element={<Insights />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+
+          {/* Recruiter Portal Routes */}
+          <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+          <Route path="/recruiter/company" element={<CompanyProfile />} />
+          <Route path="/recruiter/post-job" element={<PostJob />} />
+          <Route path="/recruiter/jobs" element={<RecruiterJobs />} />
+          <Route path="/recruiter/jobs/:jobId/applicants" element={<JobApplicants />} />
         </Route>
       </Routes>
     </BrowserRouter>
   );
 }
+
 
 export default AppRouter;

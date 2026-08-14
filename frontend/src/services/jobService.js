@@ -1,19 +1,17 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/jobs";
+import API from "./api";
 
 export const getJobs = () => {
-    return axios.get(API_URL);
+    return API.get("/jobs");
 };
 
 export const createJob = (job) => {
-    return axios.post(API_URL, job);
+    return API.post("/jobs", job);
 };
 
 export const updateJob = (id, job) => {
-    return axios.put(`${API_URL}/${id}`, job);
+    return API.put(`/jobs/${id}`, job);
 };
 
 export const deleteJob = (id) => {
-    return axios.delete(`${API_URL}/${id}`);
-};
+    return API.delete(`/jobs/${id}`);
+};

@@ -2,6 +2,7 @@ package com.vishnu.ai_job_portal_backend.dto;
 
 public class LoginResponse {
 
+    private String token;
     private String fullName;
     private String email;
     private String role;
@@ -9,10 +10,25 @@ public class LoginResponse {
     public LoginResponse() {
     }
 
+    public LoginResponse(String token, String fullName, String email, String role) {
+        this.token = token;
+        this.fullName = fullName;
+        this.email = email;
+        this.role = role;
+    }
+
     public LoginResponse(String fullName, String email, String role) {
         this.fullName = fullName;
         this.email = email;
         this.role = role;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getFullName() {
@@ -38,4 +54,4 @@ public class LoginResponse {
     public void setRole(String role) {
         this.role = role;
     }
-}
+}

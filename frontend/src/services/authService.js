@@ -1,11 +1,5 @@
-import axios from "axios";
+import API from "./api";
 
-const API = "https://ai-powered-job-portal-production-573c.up.railway.app/auth";
+export const login = (user) => API.post("/auth/login", user);
 
-export const login = (user) => {
-    return axios.post(`${API}/login`, user);
-};
-
-export const signup = (user) => {
-    return axios.post(`${API}/signup`, user);
-};
+export const signup = (user) => API.post("/auth/signup", user);

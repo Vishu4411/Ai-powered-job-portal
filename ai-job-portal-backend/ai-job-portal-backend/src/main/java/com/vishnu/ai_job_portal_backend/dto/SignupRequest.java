@@ -5,6 +5,7 @@ public class SignupRequest {
     private String fullName;
     private String email;
     private String password;
+    private String role;
 
     public SignupRequest() {
     }
@@ -32,4 +33,12 @@ public class SignupRequest {
     public void setPassword(String password) {
         this.password = password;
     }
-}
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+}

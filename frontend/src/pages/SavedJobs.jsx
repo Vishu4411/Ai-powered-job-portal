@@ -4,8 +4,10 @@ import {
   getSavedJobs,
   deleteSavedJob,
 } from "../services/savedJobService";
+import { useToast } from "../context/ToastContext";
 
 function SavedJobs() {
+  const { showToast } = useToast();
   const [savedJobs, setSavedJobs] = useState([]);
 
   useEffect(() => {
@@ -26,12 +28,13 @@ function SavedJobs() {
     try {
       await deleteSavedJob(id);
       loadSavedJobs();
-      alert("Removed Successfully");
+      showToast("Job removed from saved jobs.", "info");
     } catch (err) {
       console.log(err);
-      alert("Delete Failed");
+      showToast("Failed to remove saved job.", "error");
     }
   };
+
 
   return (
     <div className="space-y-6">

@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signup } from "../services/authService";
+import { useToast } from "../context/ToastContext";
 
 function Signup() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [user, setUser] = useState({
     fullName: "",
     email: "",
     password: "",
+    role: "ROLE_USER",
   });
 
   const handleChange = (e) => {
@@ -23,15 +26,14 @@ function Signup() {
 
     try {
       const response = await signup(user);
-
-      alert(response.data);
-
+      showToast(response.data || "Account registered successfully! Please log in.", "success");
       navigate("/login");
     } catch (error) {
       console.log(error);
-      alert("Signup Failed");
+      showToast(error.response?.data || "Account creation failed. Email may already be registered.", "error");
     }
   };
+
 
   return (
     <div
@@ -50,7 +52,7 @@ function Signup() {
           gap: "15px",
         }}
       >
-        <h2>Signup</h2>
+        <h2>Create Account</h2>
 
         <input
           type="text"
@@ -75,6 +77,20 @@ function Signup() {
           onChange={handleChange}
           required
         />
+
+        <select
+          name="role"
+          value={user.role}
+          onChange={handleChange}
+          style={{
+            padding: "8px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+          }}
+        >
+          <option value="ROLE_USER">Job Seeker (Candidate)</option>
+          <option value="ROLE_RECRUITER">Employer / Recruiter</option>
+        </select>
 
         <button type="submit">Signup</button>
 

@@ -1,7 +1,5 @@
-import axios from "axios";
+import API from "./api";
 
-const API = "http://localhost:8080/dashboard";
-
-export const getDashboardStats = (email) => {
-  return axios.get(`${API}/${email}`);
+export const getDashboardStats = () => {
+  return API.get("/dashboard/me");
 };

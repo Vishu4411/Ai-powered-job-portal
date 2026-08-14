@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login } from "../services/authService";
+import { useToast } from "../context/ToastContext";
 import { Mail, Lock, LogIn, Compass } from "lucide-react";
 
 function Login() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [user, setUser] = useState({
     email: "",
@@ -24,15 +26,20 @@ function Login() {
     try {
       const response = await login(user);
 
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
       localStorage.setItem("fullName", response.data.fullName);
       localStorage.setItem("email", response.data.email);
       localStorage.setItem("role", response.data.role);
 
+      showToast("Welcome back! Login successful.", "success");
       navigate("/dashboard");
     } catch (error) {
-      alert(error.response?.data || error.message);
+      showToast(error.response?.data || error.message || "Invalid credentials. Login failed.", "error");
     }
   };
+
 
  return (
   <div className="min-h-screen bg-[#0b1020] flex">

@@ -1,6 +1,7 @@
 package com.vishnu.ai_job_portal_backend.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "applications")
@@ -20,6 +21,15 @@ public class Application {
     @ManyToOne
     @JoinColumn(name = "job_id")
     private Job job;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "candidate_user_id")
+    private User candidate;
+
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus status = ApplicationStatus.APPLIED;
+
+    private LocalDateTime appliedAt = LocalDateTime.now();
 
     public Application() {}
 
@@ -62,4 +72,28 @@ public class Application {
     public void setJob(Job job) {
         this.job = job;
     }
-}
+
+    public User getCandidate() {
+        return candidate;
+    }
+
+    public void setCandidate(User candidate) {
+        this.candidate = candidate;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getAppliedAt() {
+        return appliedAt;
+    }
+
+    public void setAppliedAt(LocalDateTime appliedAt) {
+        this.appliedAt = appliedAt;
+    }
+}
