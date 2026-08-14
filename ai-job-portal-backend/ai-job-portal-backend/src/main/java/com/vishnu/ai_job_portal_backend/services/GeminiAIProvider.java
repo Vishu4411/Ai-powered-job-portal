@@ -2,11 +2,13 @@ package com.vishnu.ai_job_portal_backend.services;
 
 import com.vishnu.ai_job_portal_backend.dto.ATSResumeAnalysisDTO;
 import com.vishnu.ai_job_portal_backend.dto.CandidateInsightsDTO;
-
 import com.vishnu.ai_job_portal_backend.dto.JobMatchResultDTO;
+import com.vishnu.ai_job_portal_backend.dto.MockInterviewFeedbackDTO;
+import com.vishnu.ai_job_portal_backend.dto.MockInterviewSubmissionDTO;
 import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
+
 
 
 import org.slf4j.Logger;
@@ -263,12 +265,53 @@ public class GeminiAIProvider implements AIProvider {
             if (aiResponse != null && !aiResponse.trim().isEmpty()) {
                 baseInsights.setExecutiveSummary(aiResponse);
             }
+
         } catch (Exception e) {
             log.warn("Gemini Candidate Insights generation failed: {}", e.getMessage());
         }
 
         return baseInsights;
     }
+
+    @Override
+    public MockInterviewFeedbackDTO evaluateMockInterviewAnswers(UserProfileDTO candidate, Job job, MockInterviewSubmissionDTO submission, MockInterviewFeedbackDTO baseFeedback) {
+        if (!isApiKeyConfigured() || submission == null || submission.getAnswers() == null || submission.getAnswers().isEmpty()) {
+            return baseFeedback;
+        }
+
+        try {
+            StringBuilder promptBuilder = new StringBuilder();
+            promptBuilder.append(String.format(
+                    "You are a Senior Engineering Hiring Manager conducting a technical interview for role '%s'.\n" +
+                    "Evaluated Candidate Skills: %s\n\n" +
+                    "Review the candidate's answers below and provide brief model answer advice and strategic takeaways:\n\n",
+                    job != null ? job.getTitle() : "Software Engineer",
+                    candidate != null && candidate.getSkills() != null ? candidate.getSkills() : "Java, React, SQL"
+            ));
+
+            for (MockInterviewSubmissionDTO.AnswerItem item : submission.getAnswers()) {
+                promptBuilder.append(String.format(
+                        "Q%d [%s]: %s\nCandidate Answer: %s\n\n",
+                        item.getQuestionId(),
+                        item.getCategory() != null ? item.getCategory() : "Technical",
+                        item.getQuestionText(),
+                        item.getCandidateAnswer() != null && !item.getCandidateAnswer().trim().isEmpty() ? item.getCandidateAnswer() : "No answer provided"
+                ));
+            }
+
+            promptBuilder.append("Provide concise, professional interview performance feedback with model answer guidance for key questions.");
+
+            String aiAdvice = callGeminiApi(promptBuilder.toString());
+            if (aiAdvice != null && !aiAdvice.trim().isEmpty()) {
+                baseFeedback.setKeyTakeaway(aiAdvice.trim());
+            }
+        } catch (Exception e) {
+            log.warn("Gemini Mock Interview Answer Evaluation failed: {}", e.getMessage());
+        }
+
+        return baseFeedback;
+    }
+
 
 
 

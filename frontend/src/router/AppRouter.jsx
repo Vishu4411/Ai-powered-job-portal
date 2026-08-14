@@ -47,6 +47,7 @@ function AppRouter() {
           <Route path="/saved-jobs" element={<SavedJobs />} />
           <Route path="/applications" element={<Applications />} />
           <Route path="/interviews" element={<Interviews />} />
+          <Route path="/mock-interview" element={<MockInterviewSimulator />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />

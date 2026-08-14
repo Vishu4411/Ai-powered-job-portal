@@ -4,7 +4,16 @@ export const getCareerReadiness = () => {
   return API.get("/ai/career/readiness");
 };
 
+export const startMockInterview = (jobId) => {
+  return API.post("/ai/interview-simulator/start", jobId ? { jobId } : {});
+};
+
+export const submitMockInterview = (submissionData) => {
+  return API.post("/ai/interview-simulator/evaluate", submissionData);
+};
+
 export const analyzeResumeATS = () => {
+
 
   return API.post("/ai/resume/ats-analyze");
 };

@@ -7,6 +7,7 @@ import {
   Heart,
   Target,
   MessageSquare,
+  MessageSquareCode,
   TrendingUp,
   User,
   Settings,
@@ -24,11 +25,13 @@ const candidateNavItems = [
   { to: "/jobs", label: "Job Search", icon: Briefcase },
   { to: "/saved-jobs", label: "Saved Jobs", icon: Heart },
   { to: "/applications", label: "Applications", icon: Target },
-  { to: "/interviews", label: "Interview Prep", icon: MessageSquare },
+  { to: "/interviews", label: "Scheduled Interviews", icon: MessageSquare },
+  { to: "/mock-interview", label: "AI Mock Interview", icon: MessageSquareCode },
   { to: "/insights", label: "Career Insights", icon: TrendingUp },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
+
 
 const recruiterNavItems = [
   { to: "/recruiter/dashboard", label: "Recruiter Dashboard", icon: LayoutDashboard },

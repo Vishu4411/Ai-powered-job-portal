@@ -5,6 +5,9 @@ import com.vishnu.ai_job_portal_backend.dto.CandidateInsightsDTO;
 import com.vishnu.ai_job_portal_backend.dto.CareerReadinessDTO;
 import com.vishnu.ai_job_portal_backend.dto.JobMatchResultDTO;
 import com.vishnu.ai_job_portal_backend.dto.JobRecommendationDTO;
+import com.vishnu.ai_job_portal_backend.dto.MockInterviewFeedbackDTO;
+import com.vishnu.ai_job_portal_backend.dto.MockInterviewSessionDTO;
+import com.vishnu.ai_job_portal_backend.dto.MockInterviewSubmissionDTO;
 import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
@@ -14,6 +17,7 @@ import com.vishnu.ai_job_portal_backend.services.AIProvider;
 import com.vishnu.ai_job_portal_backend.services.ATSScoringEngine;
 import com.vishnu.ai_job_portal_backend.services.CareerReadinessEngine;
 import com.vishnu.ai_job_portal_backend.services.DeterministicScoringEngine;
+import com.vishnu.ai_job_portal_backend.services.MockInterviewEngine;
 import com.vishnu.ai_job_portal_backend.services.ProfileService;
 import com.vishnu.ai_job_portal_backend.services.RecruiterApplicationService;
 import com.vishnu.ai_job_portal_backend.services.SkillRoadmapEngine;
@@ -37,6 +41,7 @@ public class AIController {
     private final SkillRoadmapEngine roadmapEngine;
     private final RecruiterApplicationService recruiterApplicationService;
     private final CareerReadinessEngine careerReadinessEngine;
+    private final MockInterviewEngine mockInterviewEngine;
 
     public AIController(ProfileService profileService,
                         JobRepository jobRepository,
@@ -45,7 +50,8 @@ public class AIController {
                         ATSScoringEngine atsScoringEngine,
                         SkillRoadmapEngine roadmapEngine,
                         RecruiterApplicationService recruiterApplicationService,
-                        CareerReadinessEngine careerReadinessEngine) {
+                        CareerReadinessEngine careerReadinessEngine,
+                        MockInterviewEngine mockInterviewEngine) {
         this.profileService = profileService;
         this.jobRepository = jobRepository;
         this.scoringEngine = scoringEngine;
@@ -54,10 +60,45 @@ public class AIController {
         this.roadmapEngine = roadmapEngine;
         this.recruiterApplicationService = recruiterApplicationService;
         this.careerReadinessEngine = careerReadinessEngine;
+        this.mockInterviewEngine = mockInterviewEngine;
+    }
+
+    @PostMapping("/interview-simulator/start")
+    public ResponseEntity<MockInterviewSessionDTO> startMockInterview(@RequestBody(required = false) Map<String, Long> body,
+                                                                      Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+
+        Long jobId = (body != null) ? body.get("jobId") : null;
+        Job job = null;
+        if (jobId != null) {
+            job = jobRepository.findById(jobId).orElse(null);
+        }
+
+        MockInterviewSessionDTO session = mockInterviewEngine.generateSession(candidate, job);
+        return ResponseEntity.ok(session);
+    }
+
+    @PostMapping("/interview-simulator/evaluate")
+    public ResponseEntity<MockInterviewFeedbackDTO> evaluateMockInterview(@RequestBody MockInterviewSubmissionDTO submission,
+                                                                           Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+
+        Job job = null;
+        if (submission != null && submission.getJobId() != null) {
+            job = jobRepository.findById(submission.getJobId()).orElse(null);
+        }
+
+        MockInterviewFeedbackDTO baseFeedback = mockInterviewEngine.evaluateSubmission(candidate, job, submission);
+        MockInterviewFeedbackDTO fullFeedback = aiProvider.evaluateMockInterviewAnswers(candidate, job, submission, baseFeedback);
+
+        return ResponseEntity.ok(fullFeedback);
     }
 
     @GetMapping("/career/readiness")
     public ResponseEntity<CareerReadinessDTO> getCareerReadiness(Authentication authentication) {
+
         String email = authentication.getName();
         UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
         CareerReadinessDTO readiness = careerReadinessEngine.calculateReadiness(candidate);
