@@ -1,6 +1,11 @@
 import API from "./api";
 
+export const getCareerReadiness = () => {
+  return API.get("/ai/career/readiness");
+};
+
 export const analyzeResumeATS = () => {
+
   return API.post("/ai/resume/ats-analyze");
 };
 

@@ -2,6 +2,7 @@ package com.vishnu.ai_job_portal_backend.controller;
 
 import com.vishnu.ai_job_portal_backend.dto.ATSResumeAnalysisDTO;
 import com.vishnu.ai_job_portal_backend.dto.CandidateInsightsDTO;
+import com.vishnu.ai_job_portal_backend.dto.CareerReadinessDTO;
 import com.vishnu.ai_job_portal_backend.dto.JobMatchResultDTO;
 import com.vishnu.ai_job_portal_backend.dto.JobRecommendationDTO;
 import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
@@ -11,6 +12,7 @@ import com.vishnu.ai_job_portal_backend.entity.JobStatus;
 import com.vishnu.ai_job_portal_backend.repository.JobRepository;
 import com.vishnu.ai_job_portal_backend.services.AIProvider;
 import com.vishnu.ai_job_portal_backend.services.ATSScoringEngine;
+import com.vishnu.ai_job_portal_backend.services.CareerReadinessEngine;
 import com.vishnu.ai_job_portal_backend.services.DeterministicScoringEngine;
 import com.vishnu.ai_job_portal_backend.services.ProfileService;
 import com.vishnu.ai_job_portal_backend.services.RecruiterApplicationService;
@@ -34,6 +36,7 @@ public class AIController {
     private final ATSScoringEngine atsScoringEngine;
     private final SkillRoadmapEngine roadmapEngine;
     private final RecruiterApplicationService recruiterApplicationService;
+    private final CareerReadinessEngine careerReadinessEngine;
 
     public AIController(ProfileService profileService,
                         JobRepository jobRepository,
@@ -41,7 +44,8 @@ public class AIController {
                         AIProvider aiProvider,
                         ATSScoringEngine atsScoringEngine,
                         SkillRoadmapEngine roadmapEngine,
-                        RecruiterApplicationService recruiterApplicationService) {
+                        RecruiterApplicationService recruiterApplicationService,
+                        CareerReadinessEngine careerReadinessEngine) {
         this.profileService = profileService;
         this.jobRepository = jobRepository;
         this.scoringEngine = scoringEngine;
@@ -49,7 +53,17 @@ public class AIController {
         this.atsScoringEngine = atsScoringEngine;
         this.roadmapEngine = roadmapEngine;
         this.recruiterApplicationService = recruiterApplicationService;
+        this.careerReadinessEngine = careerReadinessEngine;
     }
+
+    @GetMapping("/career/readiness")
+    public ResponseEntity<CareerReadinessDTO> getCareerReadiness(Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+        CareerReadinessDTO readiness = careerReadinessEngine.calculateReadiness(candidate);
+        return ResponseEntity.ok(readiness);
+    }
+
 
     @GetMapping("/recruiter/applications/{applicationId}/insights")
     public ResponseEntity<CandidateInsightsDTO> getCandidateInsights(@PathVariable Long applicationId,
