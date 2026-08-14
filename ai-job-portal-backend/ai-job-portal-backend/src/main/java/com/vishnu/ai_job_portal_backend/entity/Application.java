@@ -1,5 +1,7 @@
 package com.vishnu.ai_job_portal_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -22,6 +24,8 @@ public class Application {
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @JsonIgnore
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "candidate_user_id")
     private User candidate;
@@ -96,4 +100,4 @@ public class Application {
     public void setAppliedAt(LocalDateTime appliedAt) {
         this.appliedAt = appliedAt;
     }
-}
+}

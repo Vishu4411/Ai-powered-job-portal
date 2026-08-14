@@ -1,5 +1,7 @@
 package com.vishnu.ai_job_portal_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,10 +24,14 @@ public class Job {
     private String title;
     private String company; // String company name retained for backward compatibility
 
+    @JsonIgnore
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company companyEntity;
 
+    @JsonIgnore
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "posted_by_user_id")
     private User postedBy;
@@ -47,4 +53,4 @@ public class Job {
     private JobStatus status = JobStatus.OPEN;
 
     private LocalDateTime createdAt = LocalDateTime.now();
-}
+}
