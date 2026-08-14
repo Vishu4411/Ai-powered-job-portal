@@ -1,8 +1,14 @@
 package com.vishnu.ai_job_portal_backend.services;
 
+import com.vishnu.ai_job_portal_backend.dto.ATSResumeAnalysisDTO;
+import com.vishnu.ai_job_portal_backend.dto.CandidateInsightsDTO;
+
 import com.vishnu.ai_job_portal_backend.dto.JobMatchResultDTO;
+import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +22,8 @@ import java.util.*;
 
 @Service
 public class GeminiAIProvider implements AIProvider {
+
+
 
     private static final Logger log = LoggerFactory.getLogger(GeminiAIProvider.class);
 
@@ -147,6 +155,123 @@ public class GeminiAIProvider implements AIProvider {
                 ? aiResponse
                 : "Keep expanding your technical stack and project portfolio.";
     }
+
+    @Override
+    public ATSResumeAnalysisDTO analyzeResumeATS(UserProfileDTO candidate, ATSResumeAnalysisDTO baseAnalysis) {
+        if (!isApiKeyConfigured() || candidate == null) {
+            return baseAnalysis;
+        }
+
+        try {
+            String prompt = String.format(
+                    "You are an ATS (Applicant Tracking System) & Resume Specialist.\n" +
+                    "Analyze the following candidate professional profile (Deterministic ATS Score: %d%%):\n" +
+                    "Headline: %s\n" +
+                    "Professional Bio: %s\n" +
+                    "Technical Skills: %s\n" +
+                    "Education Count: %d\n" +
+                    "Experience Count: %d\n" +
+                    "Project Count: %d\n\n" +
+                    "Provide a 2-3 paragraph professional ATS feedback summary highlighting structural strengths, missing industry keywords, and formatting recommendations.",
+                    baseAnalysis.getOverallScore(),
+                    candidate.getHeadline() != null ? candidate.getHeadline() : "Software Professional",
+                    candidate.getBio() != null ? candidate.getBio() : "N/A",
+                    candidate.getSkills() != null ? candidate.getSkills() : "N/A",
+                    candidate.getEducationList() != null ? candidate.getEducationList().size() : 0,
+                    candidate.getExperienceList() != null ? candidate.getExperienceList().size() : 0,
+                    candidate.getProjectList() != null ? candidate.getProjectList().size() : 0
+            );
+
+            String aiResponse = callGeminiApi(prompt);
+            if (aiResponse != null && !aiResponse.trim().isEmpty()) {
+                baseAnalysis.setAiExplanation(aiResponse);
+            }
+        } catch (Exception e) {
+            log.warn("Gemini ATS analysis call failed: {}", e.getMessage());
+        }
+
+        return baseAnalysis;
+    }
+
+    @Override
+    public SkillGapRoadmapDTO generateSkillRoadmap(UserProfileDTO candidate, Job job, JobMatchResultDTO matchResult, SkillGapRoadmapDTO baseRoadmap) {
+        if (!isApiKeyConfigured() || candidate == null || job == null) {
+            return baseRoadmap;
+        }
+
+        try {
+            String prompt = String.format(
+                    "You are an AI Technical Career & Learning Specialist.\n" +
+                    "Generate a personalized weekly learning roadmap for a software professional targeting position '%s' at %s (Match Score: %d%%).\n" +
+                    "Matching skills possessed: %s.\n" +
+                    "Missing required skills to acquire: %s.\n\n" +
+                    "Provide:\n" +
+                    "1. A 2-paragraph executive roadmap summary.\n" +
+                    "2. A step-by-step 4-week learning progression plan.\n" +
+                    "3. A recommended portfolio project title & description to demonstrate mastery.",
+                    job.getTitle(),
+                    job.getCompany() != null ? job.getCompany() : "Target Company",
+                    matchResult.getOverallMatchScore(),
+                    matchResult.getMatchingSkills().isEmpty() ? "None" : String.join(", ", matchResult.getMatchingSkills()),
+                    matchResult.getMissingSkills().isEmpty() ? "None" : String.join(", ", matchResult.getMissingSkills())
+            );
+
+            String aiResponse = callGeminiApi(prompt);
+            if (aiResponse != null && !aiResponse.trim().isEmpty()) {
+                baseRoadmap.setRoadmapSummary(aiResponse);
+            }
+        } catch (Exception e) {
+            log.warn("Gemini Skill Roadmap generation failed: {}", e.getMessage());
+        }
+
+        return baseRoadmap;
+    }
+
+    @Override
+    public CandidateInsightsDTO generateCandidateInsights(UserProfileDTO candidate, Job job, JobMatchResultDTO matchResult, CandidateInsightsDTO baseInsights) {
+        if (!isApiKeyConfigured() || candidate == null || job == null) {
+            return baseInsights;
+        }
+
+        try {
+            String prompt = String.format(
+                    "You are an Executive Technical Recruiter & Hiring Specialist.\n" +
+                    "Analyze candidate %s for position '%s' at %s (Deterministic Match Score: %d%%).\n" +
+                    "Headline: %s\n" +
+                    "Bio: %s\n" +
+                    "Candidate Skills: %s\n" +
+                    "Job Required Skills: %s\n" +
+                    "Matching Skills: %s\n" +
+                    "Missing Skills: %s\n\n" +
+                    "Provide a structured assessment:\n" +
+                    "1. Executive Summary: 2-3 sentence overview for hiring manager.\n" +
+                    "2. Role Fit Analysis: 2 sentence summary on technical and experience alignment.\n" +
+                    "3. Exactly 5 targeted technical & behavioral interview questions tailored to candidate background and job requirements.",
+                    candidate.getFullName() != null ? candidate.getFullName() : "Candidate",
+                    job.getTitle(),
+                    job.getCompany() != null ? job.getCompany() : "Target Company",
+                    matchResult.getOverallMatchScore(),
+                    candidate.getHeadline() != null ? candidate.getHeadline() : "N/A",
+                    candidate.getBio() != null ? candidate.getBio() : "N/A",
+                    candidate.getSkills() != null ? candidate.getSkills() : "N/A",
+                    job.getSkills() != null ? job.getSkills() : "N/A",
+                    matchResult.getMatchingSkills().isEmpty() ? "None" : String.join(", ", matchResult.getMatchingSkills()),
+                    matchResult.getMissingSkills().isEmpty() ? "None" : String.join(", ", matchResult.getMissingSkills())
+            );
+
+            String aiResponse = callGeminiApi(prompt);
+            if (aiResponse != null && !aiResponse.trim().isEmpty()) {
+                baseInsights.setExecutiveSummary(aiResponse);
+            }
+        } catch (Exception e) {
+            log.warn("Gemini Candidate Insights generation failed: {}", e.getMessage());
+        }
+
+        return baseInsights;
+    }
+
+
+
 
     private boolean isApiKeyConfigured() {
         return apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("YOUR_");

@@ -20,6 +20,8 @@ import com.vishnu.ai_job_portal_backend.entity.User;
 import com.vishnu.ai_job_portal_backend.repository.ApplicationRepository;
 import com.vishnu.ai_job_portal_backend.repository.UserRepository;
 
+import com.vishnu.ai_job_portal_backend.services.NotificationService;
+
 @RestController
 @RequestMapping("/applications")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
@@ -27,11 +29,14 @@ public class ApplicationController {
 
     private final ApplicationRepository applicationRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public ApplicationController(ApplicationRepository applicationRepository,
-                                 UserRepository userRepository) {
+                                 UserRepository userRepository,
+                                 NotificationService notificationService) {
         this.applicationRepository = applicationRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @PostMapping
@@ -69,9 +74,11 @@ public class ApplicationController {
         }
 
         Application saved = applicationRepository.save(application);
+        notificationService.notifyApplicationSubmitted(saved);
 
         return ResponseEntity.ok(saved);
     }
+
 
     @GetMapping
     public List<Application> getAllApplications() {

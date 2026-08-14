@@ -1,9 +1,9 @@
-import { Search, MapPin, Briefcase, Bookmark, Filter, Sparkles, X, FileText, CheckCircle2, AlertTriangle, RotateCcw, Award } from "lucide-react";
+import { Search, MapPin, Briefcase, Bookmark, Filter, Sparkles, X, FileText, CheckCircle2, AlertTriangle, RotateCcw, Award, Compass, BookOpen, Layers, Clock } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { getJobs } from "../services/jobService";
 import { applyJob } from "../services/applicationService";
 import { saveJob } from "../services/savedJobService";
-import { getJobMatch, getJobExplanation, generateCoverLetter } from "../services/aiService";
+import { getJobMatch, getJobExplanation, generateCoverLetter, getSkillGapRoadmap } from "../services/aiService";
 import { useToast } from "../context/ToastContext";
 
 function Jobs() {
@@ -28,6 +28,10 @@ function Jobs() {
 
   const [coverLetterText, setCoverLetterText] = useState("");
   const [loadingCoverLetter, setLoadingCoverLetter] = useState(false);
+
+  const [roadmapData, setRoadmapData] = useState(null);
+  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
+
 
   useEffect(() => {
     getJobs()
@@ -127,6 +131,7 @@ function Jobs() {
     setLoadingMatch(true);
     setAiExplanation("");
     setCoverLetterText("");
+    setRoadmapData(null);
 
     try {
       const res = await getJobMatch(job.id);
@@ -155,6 +160,22 @@ function Jobs() {
     }
   };
 
+  const handleFetchSkillRoadmap = async () => {
+    if (!selectedJob) return;
+    setLoadingRoadmap(true);
+    try {
+      const res = await getSkillGapRoadmap(selectedJob.id);
+      if (res.data) {
+        setRoadmapData(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to generate skill roadmap.", "error");
+    } finally {
+      setLoadingRoadmap(false);
+    }
+  };
+
   const handleGenerateCoverLetter = async () => {
     if (!selectedJob) return;
     setLoadingCoverLetter(true);
@@ -170,6 +191,7 @@ function Jobs() {
       setLoadingCoverLetter(false);
     }
   };
+
 
   const handleApply = async (job) => {
     const application = {
@@ -515,6 +537,71 @@ function Jobs() {
                       ))}
                     </div>
                   </div>
+
+                  {/* AI Skill Gap & Learning Roadmap */}
+                  <div className="space-y-3 pt-2 border-t border-slate-800">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <Compass className="text-amber-400" size={14} /> Skill Gap & Learning Roadmap
+                      </h4>
+                      {!roadmapData && (
+                        <button
+                          onClick={handleFetchSkillRoadmap}
+                          disabled={loadingRoadmap}
+                          className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1"
+                        >
+                          <Sparkles size={12} className={loadingRoadmap ? "animate-spin" : ""} />
+                          {loadingRoadmap ? "Generating Roadmap..." : "Generate AI Learning Roadmap"}
+                        </button>
+                      )}
+                    </div>
+
+                    {roadmapData && (
+                      <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                          <div className="flex items-center gap-2">
+                            <Clock size={16} className="text-amber-400" />
+                            <span className="text-xs font-bold text-white">Estimated Preparation:</span>
+                            <span className="px-2.5 py-0.5 bg-amber-950 text-amber-300 border border-amber-800 rounded-full text-xs font-bold">
+                              {roadmapData.estimatedPreparation}
+                            </span>
+                          </div>
+                        </div>
+
+                        {roadmapData.roadmapSummary && (
+                          <p className="text-xs text-slate-300 leading-relaxed border-b border-slate-800 pb-3">
+                            {roadmapData.roadmapSummary}
+                          </p>
+                        )}
+
+                        {roadmapData.weeklyRoadmap && roadmapData.weeklyRoadmap.length > 0 && (
+                          <div className="space-y-2">
+                            <h5 className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
+                              <BookOpen size={12} /> Weekly Learning Plan:
+                            </h5>
+                            <div className="space-y-1.5 pl-1">
+                              {roadmapData.weeklyRoadmap.map((step, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-xs text-slate-300 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                                  <span className="font-bold text-amber-400 shrink-0">#{idx + 1}</span>
+                                  <span>{step}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {roadmapData.recommendedProject && (
+                          <div className="bg-indigo-950/40 border border-indigo-800/60 p-3 rounded-lg text-xs space-y-1">
+                            <div className="font-bold text-indigo-300 flex items-center gap-1">
+                              <Layers size={13} /> Recommended Portfolio Project:
+                            </div>
+                            <p className="text-slate-300">{roadmapData.recommendedProject}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
 
                   {/* AI Explanation Section */}
                   <div className="space-y-3 pt-2">

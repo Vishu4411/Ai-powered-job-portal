@@ -1,8 +1,18 @@
 import API from "./api";
 
+export const analyzeResumeATS = () => {
+  return API.post("/ai/resume/ats-analyze");
+};
+
+export const getRecommendedJobs = () => {
+  return API.get("/ai/jobs/recommended");
+};
+
+
 export const getJobMatch = (jobId) => {
   return API.get(`/ai/jobs/${jobId}/match`);
 };
+
 
 export const getJobExplanation = (jobId) => {
   return API.post(`/ai/jobs/${jobId}/explanation`);
@@ -12,6 +22,11 @@ export const getSkillGapAnalysis = (jobId) => {
   return API.post("/ai/skill-gap", { jobId });
 };
 
+export const getSkillGapRoadmap = (jobId) => {
+  return API.post(`/ai/jobs/${jobId}/skill-roadmap`);
+};
+
+
 export const getCareerAdvice = () => {
   return API.post("/ai/career-advice");
 };
@@ -20,6 +35,11 @@ export const generateCoverLetter = (jobId) => {
   return API.post("/ai/cover-letter/generate", { jobId });
 };
 
-export const generateInterviewQuestions = (jobId) => {
-  return API.post("/ai/interview-prep/generate", { jobId });
+export const getRankedApplicants = (jobId) => {
+  return API.get(`/recruiter/jobs/${jobId}/ranked-applicants`);
 };
+
+export const getCandidateInsights = (applicationId) => {
+  return API.get(`/ai/recruiter/applications/${applicationId}/insights`);
+};
+

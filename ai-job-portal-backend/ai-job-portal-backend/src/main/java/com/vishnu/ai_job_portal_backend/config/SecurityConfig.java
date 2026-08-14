@@ -11,6 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+
 @Configuration
 public class SecurityConfig {
 
@@ -31,22 +34,30 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
                         .requestMatchers("/recruiter/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
+                        .requestMatchers("/ai/recruiter/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
                         .requestMatchers("/companies/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/jobs/*/apply").authenticated()
+                        .requestMatchers("/notifications/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/jobs/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/jobs/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAnyAuthority("ROLE_RECRUITER", "ROLE_ADMIN")
                         .anyRequest().authenticated())
+
+
+
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
+
 
 

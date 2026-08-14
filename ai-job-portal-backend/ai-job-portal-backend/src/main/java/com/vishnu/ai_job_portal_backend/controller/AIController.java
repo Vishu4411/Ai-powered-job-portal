@@ -1,12 +1,20 @@
 package com.vishnu.ai_job_portal_backend.controller;
 
+import com.vishnu.ai_job_portal_backend.dto.ATSResumeAnalysisDTO;
+import com.vishnu.ai_job_portal_backend.dto.CandidateInsightsDTO;
 import com.vishnu.ai_job_portal_backend.dto.JobMatchResultDTO;
+import com.vishnu.ai_job_portal_backend.dto.JobRecommendationDTO;
+import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
+import com.vishnu.ai_job_portal_backend.entity.JobStatus;
 import com.vishnu.ai_job_portal_backend.repository.JobRepository;
 import com.vishnu.ai_job_portal_backend.services.AIProvider;
+import com.vishnu.ai_job_portal_backend.services.ATSScoringEngine;
 import com.vishnu.ai_job_portal_backend.services.DeterministicScoringEngine;
 import com.vishnu.ai_job_portal_backend.services.ProfileService;
+import com.vishnu.ai_job_portal_backend.services.RecruiterApplicationService;
+import com.vishnu.ai_job_portal_backend.services.SkillRoadmapEngine;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +31,105 @@ public class AIController {
     private final JobRepository jobRepository;
     private final DeterministicScoringEngine scoringEngine;
     private final AIProvider aiProvider;
+    private final ATSScoringEngine atsScoringEngine;
+    private final SkillRoadmapEngine roadmapEngine;
+    private final RecruiterApplicationService recruiterApplicationService;
 
     public AIController(ProfileService profileService,
                         JobRepository jobRepository,
                         DeterministicScoringEngine scoringEngine,
-                        AIProvider aiProvider) {
+                        AIProvider aiProvider,
+                        ATSScoringEngine atsScoringEngine,
+                        SkillRoadmapEngine roadmapEngine,
+                        RecruiterApplicationService recruiterApplicationService) {
         this.profileService = profileService;
         this.jobRepository = jobRepository;
         this.scoringEngine = scoringEngine;
         this.aiProvider = aiProvider;
+        this.atsScoringEngine = atsScoringEngine;
+        this.roadmapEngine = roadmapEngine;
+        this.recruiterApplicationService = recruiterApplicationService;
     }
+
+    @GetMapping("/recruiter/applications/{applicationId}/insights")
+    public ResponseEntity<CandidateInsightsDTO> getCandidateInsights(@PathVariable Long applicationId,
+                                                                      Authentication authentication) {
+        String email = authentication.getName();
+        CandidateInsightsDTO insights = recruiterApplicationService.getCandidateInsights(email, applicationId);
+        return ResponseEntity.ok(insights);
+    }
+
+
+    @PostMapping("/jobs/{jobId}/skill-roadmap")
+    public ResponseEntity<SkillGapRoadmapDTO> getJobSkillRoadmap(@PathVariable Long jobId,
+                                                                 Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found: " + jobId));
+
+        JobMatchResultDTO matchResult = scoringEngine.calculateMatch(candidate, job);
+        SkillGapRoadmapDTO baseRoadmap = roadmapEngine.generateBaseRoadmap(candidate, job, matchResult);
+        SkillGapRoadmapDTO fullRoadmap = aiProvider.generateSkillRoadmap(candidate, job, matchResult, baseRoadmap);
+
+        return ResponseEntity.ok(fullRoadmap);
+    }
+
+
+    @PostMapping("/resume/ats-analyze")
+    public ResponseEntity<ATSResumeAnalysisDTO> analyzeResumeATS(Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+
+        ATSResumeAnalysisDTO baseAnalysis = atsScoringEngine.calculateATSScore(candidate);
+        ATSResumeAnalysisDTO fullAnalysis = aiProvider.analyzeResumeATS(candidate, baseAnalysis);
+
+        return ResponseEntity.ok(fullAnalysis);
+    }
+
+
+    @GetMapping("/jobs/recommended")
+    public ResponseEntity<List<JobRecommendationDTO>> getRecommendedJobs(Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+
+        List<Job> allJobs = jobRepository.findAll();
+        List<Job> openJobs = allJobs.stream()
+                .filter(j -> j.getStatus() == null || j.getStatus() == JobStatus.OPEN)
+                .toList();
+
+        List<JobRecommendationDTO> recommendations = openJobs.stream()
+                .map(job -> {
+                    JobMatchResultDTO match = scoringEngine.calculateMatch(candidate, job);
+                    JobRecommendationDTO dto = new JobRecommendationDTO();
+                    dto.setJobId(job.getId());
+                    dto.setTitle(job.getTitle());
+                    dto.setCompany(job.getCompanyEntity() != null ? job.getCompanyEntity().getCompanyName() : job.getCompany());
+                    dto.setLocation(job.getLocation());
+                    dto.setSalary(job.getSalary());
+                    dto.setExperience(job.getExperience());
+                    dto.setJobType(job.getJobType());
+                    dto.setSkills(job.getSkills());
+
+                    dto.setOverallMatchScore(match.getOverallMatchScore());
+                    dto.setSkillMatchScore(match.getSkillMatchScore());
+                    dto.setExperienceMatchScore(match.getExperienceMatchScore());
+                    dto.setEducationMatchScore(match.getEducationMatchScore());
+                    dto.setLocationMatchScore(match.getLocationMatchScore());
+                    dto.setJobTypeMatchScore(match.getJobTypeMatchScore());
+                    dto.setMatchingSkills(match.getMatchingSkills());
+                    dto.setMissingSkills(match.getMissingSkills());
+                    return dto;
+                })
+                .sorted((a, b) -> Integer.compare(b.getOverallMatchScore(), a.getOverallMatchScore()))
+                .limit(20)
+                .toList();
+
+        return ResponseEntity.ok(recommendations);
+    }
+
+
 
     @GetMapping("/jobs/{jobId}/match")
     public ResponseEntity<JobMatchResultDTO> getJobMatch(@PathVariable Long jobId,

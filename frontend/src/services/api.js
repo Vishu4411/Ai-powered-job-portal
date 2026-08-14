@@ -20,7 +20,10 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const requestUrl = error.config?.url || "";
+    const isAuthEndpoint = requestUrl.includes("/auth/login") || requestUrl.includes("/auth/signup");
+
+    if (error.response && error.response.status === 401 && !isAuthEndpoint) {
       console.warn("Unauthorized request! Token may be invalid or expired.");
       localStorage.removeItem("token");
       localStorage.removeItem("fullName");
@@ -33,5 +36,6 @@ API.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default API;

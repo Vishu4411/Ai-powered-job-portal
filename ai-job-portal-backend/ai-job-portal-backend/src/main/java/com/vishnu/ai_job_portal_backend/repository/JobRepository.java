@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface JobRepository extends JpaRepository<Job, Long> {
+    List<Job> findByStatus(JobStatus status);
     List<Job> findByPostedByEmail(String email);
     List<Job> findByCompanyEntityId(Long companyId);
     long countByPostedByEmailAndStatus(String email, JobStatus status);
     long countByPostedByEmail(String email);
-}
+}
+

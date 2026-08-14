@@ -4,6 +4,11 @@ export const getRecruiterDashboard = () => {
   return API.get("/recruiter/dashboard");
 };
 
+export const getRecruiterAnalytics = () => {
+  return API.get("/recruiter/analytics");
+};
+
+
 export const getMyJobs = () => {
   return API.get("/recruiter/jobs");
 };

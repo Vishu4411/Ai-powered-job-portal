@@ -30,6 +30,13 @@ public class RecruiterController {
         return ResponseEntity.ok(recruiterJobService.getRecruiterDashboardStats(email));
     }
 
+    @GetMapping("/analytics")
+    public ResponseEntity<RecruiterAnalyticsDTO> getAnalytics(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(recruiterApplicationService.getRecruiterAnalytics(email));
+    }
+
+
     @GetMapping("/jobs")
     public ResponseEntity<List<RecruiterJobDTO>> getMyJobs(Authentication authentication) {
         String email = authentication.getName();
@@ -65,6 +72,14 @@ public class RecruiterController {
         String email = authentication.getName();
         return ResponseEntity.ok(recruiterApplicationService.getJobApplications(email, jobId));
     }
+
+    @GetMapping("/jobs/{jobId}/ranked-applicants")
+    public ResponseEntity<List<RankedApplicantDTO>> getRankedApplicants(@PathVariable Long jobId,
+                                                                         Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(recruiterApplicationService.getRankedApplicants(email, jobId));
+    }
+
 
     @GetMapping("/applications/{applicationId}/candidate-profile")
     public ResponseEntity<UserProfileDTO> getCandidateProfile(@PathVariable Long applicationId,

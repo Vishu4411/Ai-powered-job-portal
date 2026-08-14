@@ -33,12 +33,16 @@ function Login() {
       localStorage.setItem("email", response.data.email);
       localStorage.setItem("role", response.data.role);
 
-      showToast("Welcome back! Login successful.", "success");
-      navigate("/dashboard");
+      if (response.data.role === "ROLE_RECRUITER" || response.data.role === "RECRUITER") {
+        navigate("/recruiter/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       showToast(error.response?.data || error.message || "Invalid credentials. Login failed.", "error");
     }
   };
+
 
 
  return (

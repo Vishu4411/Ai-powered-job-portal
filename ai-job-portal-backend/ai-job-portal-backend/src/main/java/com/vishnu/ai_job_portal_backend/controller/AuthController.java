@@ -41,13 +41,18 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        String rawEmail = request.getEmail() != null ? request.getEmail().trim() : "";
+        if (rawEmail.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is required");
+        }
+
+        if (userRepository.findByEmail(rawEmail).isPresent() || userRepository.findByEmail(rawEmail.toLowerCase()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already registered");
         }
 
         User user = new User();
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName() != null ? request.getFullName().trim() : "");
+        user.setEmail(rawEmail);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         // Allow ROLE_USER or ROLE_RECRUITER registration while strictly blocking ROLE_ADMIN escalation
@@ -67,7 +72,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
+        String rawEmail = request.getEmail() != null ? request.getEmail().trim() : "";
+        Optional<User> optionalUser = userRepository.findByEmail(rawEmail);
+        if (optionalUser.isEmpty()) {
+            optionalUser = userRepository.findByEmail(rawEmail.toLowerCase());
+        }
+
+        System.out.println("LOGIN EMAIL RECEIVED = [" + rawEmail + "]");
+        System.out.println("USER FOUND = " + optionalUser.isPresent());
 
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
@@ -75,12 +87,29 @@ public class AuthController {
 
         User user = optionalUser.get();
 
-        // Enforce strict BCrypt password matching
-        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        System.out.println("USER EMAIL IN DB = [" + user.getEmail() + "]");
+        System.out.println("USER ROLE = " + user.getRole());
+        System.out.println("PASSWORD HASH PRESENT = " +
+                (user.getPassword() != null && !user.getPassword().isBlank()));
+        System.out.println("PASSWORD HASH LENGTH = " +
+                (user.getPassword() != null ? user.getPassword().length() : 0));
+
+        boolean passwordMatches = false;
+        if (user.getPassword() != null && (user.getPassword().startsWith("$2a$") || user.getPassword().startsWith("$2b$"))) {
+            passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        } else if (user.getPassword() != null && user.getPassword().equals(request.getPassword())) {
+            // Auto-upgrade legacy unhashed password to BCrypt hash in MySQL
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            userRepository.save(user);
+            passwordMatches = true;
+        }
+
+        System.out.println("PASSWORD MATCHES = " + passwordMatches);
 
         if (!passwordMatches) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
+
 
         String roleName = user.getRole() != null ? user.getRole().name() : "ROLE_USER";
         String token = jwtUtil.generateToken(user.getEmail(), roleName);
