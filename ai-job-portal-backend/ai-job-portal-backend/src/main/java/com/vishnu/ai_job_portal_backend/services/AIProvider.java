@@ -37,7 +37,10 @@ public interface AIProvider {
     CareerActionPlanDTO generateCareerActionPlanCoaching(UserProfileDTO candidate, CareerActionPlanDTO basePlan);
 
     String generateApplicationCopilotStrategy(UserProfileDTO candidate, Job job, JobMatchResultDTO matchResult, ATSResumeAnalysisDTO atsAnalysis);
+
+    String generatePostApplicationCoaching(UserProfileDTO candidate, Job job, com.vishnu.ai_job_portal_backend.entity.Application application, com.vishnu.ai_job_portal_backend.dto.PostApplicationCoachDTO baseCoach);
 }
+
 
 
 

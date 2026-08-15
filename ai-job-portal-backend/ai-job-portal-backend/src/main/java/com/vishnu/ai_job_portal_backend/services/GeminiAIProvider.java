@@ -390,6 +390,44 @@ public class GeminiAIProvider implements AIProvider {
         return null;
     }
 
+    @Override
+    public String generatePostApplicationCoaching(UserProfileDTO candidate, Job job, com.vishnu.ai_job_portal_backend.entity.Application application, com.vishnu.ai_job_portal_backend.dto.PostApplicationCoachDTO baseCoach) {
+        if (!isApiKeyConfigured() || baseCoach == null) {
+            return null;
+        }
+
+        try {
+            String prompt = String.format(
+                    "You are an AI Post-Application Career Coach advising a candidate on an active job application.\n" +
+                    "Job Title: %s at %s\n" +
+                    "Application Status: %s\n" +
+                    "Candidate Headline: %s\n" +
+                    "Candidate Skills: %s\n" +
+                    "Job Match Score: %d%%\n" +
+                    "Recommended Next Action: %s\n\n" +
+                    "Provide a 2-3 sentence inspiring executive coaching guidance tailored specifically to the %s status, highlighting what immediate action the candidate should take right now.",
+                    baseCoach.getJobTitle(),
+                    baseCoach.getCompany(),
+                    baseCoach.getStatus(),
+                    candidate != null && candidate.getHeadline() != null ? candidate.getHeadline() : "Candidate",
+                    candidate != null && candidate.getSkills() != null ? candidate.getSkills() : "Skills",
+                    baseCoach.getMatchScore(),
+                    baseCoach.getRecommendedNextAction(),
+                    baseCoach.getStatus()
+            );
+
+            String result = callGeminiApi(prompt);
+            if (result != null && !result.trim().isEmpty()) {
+                return result.trim();
+            }
+        } catch (Exception e) {
+            log.warn("Gemini Post-Application Coaching generation failed: {}", e.getMessage());
+        }
+
+        return null;
+    }
+
+
 
 
 

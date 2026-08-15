@@ -10,6 +10,7 @@ import com.vishnu.ai_job_portal_backend.dto.JobRecommendationDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewFeedbackDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewSessionDTO;
 import com.vishnu.ai_job_portal_backend.dto.MockInterviewSubmissionDTO;
+import com.vishnu.ai_job_portal_backend.dto.PostApplicationCoachDTO;
 import com.vishnu.ai_job_portal_backend.dto.SkillGapRoadmapDTO;
 import com.vishnu.ai_job_portal_backend.dto.UserProfileDTO;
 import com.vishnu.ai_job_portal_backend.entity.Job;
@@ -22,6 +23,7 @@ import com.vishnu.ai_job_portal_backend.services.CareerReadinessEngine;
 import com.vishnu.ai_job_portal_backend.services.DeterministicScoringEngine;
 import com.vishnu.ai_job_portal_backend.services.JobApplicationCopilotEngine;
 import com.vishnu.ai_job_portal_backend.services.MockInterviewEngine;
+import com.vishnu.ai_job_portal_backend.services.PostApplicationCoachEngine;
 import com.vishnu.ai_job_portal_backend.services.ProfileService;
 import com.vishnu.ai_job_portal_backend.services.RecruiterApplicationService;
 import com.vishnu.ai_job_portal_backend.services.SkillRoadmapEngine;
@@ -48,6 +50,7 @@ public class AIController {
     private final MockInterviewEngine mockInterviewEngine;
     private final CareerActionPlanEngine careerActionPlanEngine;
     private final JobApplicationCopilotEngine copilotEngine;
+    private final PostApplicationCoachEngine postApplicationCoachEngine;
 
     public AIController(ProfileService profileService,
                         JobRepository jobRepository,
@@ -59,7 +62,8 @@ public class AIController {
                         CareerReadinessEngine careerReadinessEngine,
                         MockInterviewEngine mockInterviewEngine,
                         CareerActionPlanEngine careerActionPlanEngine,
-                        JobApplicationCopilotEngine copilotEngine) {
+                        JobApplicationCopilotEngine copilotEngine,
+                        PostApplicationCoachEngine postApplicationCoachEngine) {
         this.profileService = profileService;
         this.jobRepository = jobRepository;
         this.scoringEngine = scoringEngine;
@@ -71,7 +75,9 @@ public class AIController {
         this.mockInterviewEngine = mockInterviewEngine;
         this.careerActionPlanEngine = careerActionPlanEngine;
         this.copilotEngine = copilotEngine;
+        this.postApplicationCoachEngine = postApplicationCoachEngine;
     }
+
 
 
     @GetMapping("/career/action-plan")
@@ -327,5 +333,16 @@ public class AIController {
         JobApplicationCopilotDTO copilot = copilotEngine.generateCopilotStrategy(candidate, job);
         return ResponseEntity.ok(copilot);
     }
+
+    @GetMapping("/applications/{applicationId}/post-application-coach")
+    public ResponseEntity<PostApplicationCoachDTO> getPostApplicationCoach(@PathVariable Long applicationId,
+                                                                          Authentication authentication) {
+        String email = authentication.getName();
+        UserProfileDTO candidate = profileService.getProfileByUserEmail(email);
+
+        PostApplicationCoachDTO dto = postApplicationCoachEngine.generatePostApplicationCoaching(applicationId, candidate, email);
+        return ResponseEntity.ok(dto);
+    }
 }
+
 

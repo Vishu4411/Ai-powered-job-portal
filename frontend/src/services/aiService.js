@@ -12,6 +12,11 @@ export const getApplicationCopilot = (jobId) => {
   return API.post(`/ai/jobs/${jobId}/application-copilot`);
 };
 
+export const getPostApplicationCoach = (applicationId) => {
+  return API.get(`/ai/applications/${applicationId}/post-application-coach`);
+};
+
+
 
 
 export const startMockInterview = (jobId) => {
