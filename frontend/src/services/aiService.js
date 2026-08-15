@@ -8,6 +8,11 @@ export const getCareerActionPlan = () => {
   return API.get("/ai/career/action-plan");
 };
 
+export const getApplicationCopilot = (jobId) => {
+  return API.post(`/ai/jobs/${jobId}/application-copilot`);
+};
+
+
 
 export const startMockInterview = (jobId) => {
   return API.post("/ai/interview-simulator/start", jobId ? { jobId } : {});

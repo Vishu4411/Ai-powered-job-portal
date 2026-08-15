@@ -35,7 +35,10 @@ public interface AIProvider {
     MockInterviewFeedbackDTO evaluateMockInterviewAnswers(UserProfileDTO candidate, Job job, MockInterviewSubmissionDTO submission, MockInterviewFeedbackDTO baseFeedback);
 
     CareerActionPlanDTO generateCareerActionPlanCoaching(UserProfileDTO candidate, CareerActionPlanDTO basePlan);
+
+    String generateApplicationCopilotStrategy(UserProfileDTO candidate, Job job, JobMatchResultDTO matchResult, ATSResumeAnalysisDTO atsAnalysis);
 }
+
 
 
 

@@ -349,6 +349,48 @@ public class GeminiAIProvider implements AIProvider {
         return basePlan;
     }
 
+    @Override
+    public String generateApplicationCopilotStrategy(UserProfileDTO candidate, Job job, JobMatchResultDTO matchResult, ATSResumeAnalysisDTO atsAnalysis) {
+        if (!isApiKeyConfigured() || job == null) {
+            return null;
+        }
+
+        try {
+            String prompt = String.format(
+                    "You are an AI Job Application Copilot advising a job seeker on applying to a specific role.\n" +
+                    "Job Title: %s at %s\n" +
+                    "Job Requirements: %s\n" +
+                    "Candidate Headline: %s\n" +
+                    "Candidate Skills: %s\n" +
+                    "Job Match Score: %d%%\n" +
+                    "ATS Score: %d%%\n" +
+                    "Matching Skills: %s\n" +
+                    "Missing Keywords: %s\n\n" +
+                    "Write a 2-3 sentence strategic application positioning advice text explaining how the candidate should leverage their strengths and address missing keywords in their resume before submitting.",
+                    job.getTitle() != null ? job.getTitle() : "Position",
+                    job.getCompany() != null ? job.getCompany() : "Company",
+                    job.getDescription() != null ? job.getDescription() : "Technical Skills Required",
+                    candidate != null && candidate.getHeadline() != null ? candidate.getHeadline() : "Candidate",
+
+                    candidate != null && candidate.getSkills() != null ? candidate.getSkills() : "Skills",
+                    matchResult != null ? matchResult.getOverallMatchScore() : 50,
+                    atsAnalysis != null ? atsAnalysis.getOverallScore() : 50,
+                    matchResult != null && matchResult.getMatchingSkills() != null ? String.join(", ", matchResult.getMatchingSkills()) : "Core skills",
+                    matchResult != null && matchResult.getMissingSkills() != null ? String.join(", ", matchResult.getMissingSkills()) : "None"
+            );
+
+            String result = callGeminiApi(prompt);
+            if (result != null && !result.trim().isEmpty()) {
+                return result.trim();
+            }
+        } catch (Exception e) {
+            log.warn("Gemini Application Copilot Strategy generation failed: {}", e.getMessage());
+        }
+
+        return null;
+    }
+
+
 
 
 

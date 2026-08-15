@@ -1,15 +1,18 @@
-import { Search, MapPin, Briefcase, Bookmark, Filter, Sparkles, X, FileText, CheckCircle2, AlertTriangle, RotateCcw, Award, Compass, BookOpen, Layers, Clock } from "lucide-react";
+import { Search, MapPin, Briefcase, Bookmark, Filter, Sparkles, X, FileText, CheckCircle2, AlertTriangle, RotateCcw, Award, Compass, BookOpen, Layers, Clock, Rocket } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { getJobs } from "../services/jobService";
 import { applyJob } from "../services/applicationService";
 import { saveJob } from "../services/savedJobService";
 import { getJobMatch, getJobExplanation, generateCoverLetter, getSkillGapRoadmap } from "../services/aiService";
 import { useToast } from "../context/ToastContext";
+import ApplicationCopilotModal from "../components/jobs/ApplicationCopilotModal";
 
 function Jobs() {
   const { showToast } = useToast();
   const [jobs, setJobs] = useState([]);
   const [matchScores, setMatchScores] = useState({});
+  const [copilotJobId, setCopilotJobId] = useState(null);
+
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -418,6 +421,14 @@ function Jobs() {
 
                   <div className="flex gap-2 mt-2">
                     <button
+                      onClick={() => setCopilotJobId(job.id)}
+                      className="px-3 py-2 bg-gradient-to-r from-indigo-900 to-purple-950 text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-sm transition"
+                    >
+                      <Rocket size={13} className="text-indigo-400" />
+                      Copilot 🚀
+                    </button>
+
+                    <button
                       onClick={() => handleSaveJob(job)}
                       className="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition"
                       title="Save Job"
@@ -439,7 +450,17 @@ function Jobs() {
         </div>
       )}
 
+      {/* Application Copilot Modal */}
+      {copilotJobId && (
+        <ApplicationCopilotModal
+          jobId={copilotJobId}
+          onClose={() => setCopilotJobId(null)}
+          onApplied={() => setCopilotJobId(null)}
+        />
+      )}
+
       {/* AI Match & Insights Modal */}
+
       {selectedJob && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 text-white relative space-y-6">
